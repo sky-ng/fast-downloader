@@ -8,6 +8,6 @@ public class CommonConstants {
     // 使用多线程下载文件阈值为1MB
     public static final int FILE_SIZE_THRESHOLD = 1024 * 1024;
 
-    // 线程池大小
+    // 线程池大小为16
     public static final int THREAD_SIZE = 16;
 }
