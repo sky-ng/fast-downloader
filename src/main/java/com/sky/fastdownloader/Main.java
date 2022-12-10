@@ -13,7 +13,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,17 +43,24 @@ public class Main {
     private static void download(String url) throws IOException, InterruptedException {
         HttpURLConnection connection = HttpUtil.getHttpConnection(url);
         long resourceLength = HttpUtil.getResourceLength(connection);
+        HttpUtil.closeConnection(connection);
         String resourceName = getResourceName(url);
         if (resourceLength <= CommonConstants.FILE_SIZE_THRESHOLD) {
             // 单线程下载
-            HttpUtil.closeConnection(connection);
-            ExecutorService es = Executors.newSingleThreadExecutor();
             File file = new File(resourceName);
+            if (file.exists() && file.length() == resourceLength) {
+                System.err.println("file has been downloaded!");
+                return;
+            }
+            ExecutorService es = Executors.newSingleThreadExecutor();
             es.execute(new DownloadHandler(url, file, 0, resourceLength));
             es.shutdown();
         } else {
             // 多线程下载
-            HttpUtil.closeConnection(connection);
+            if (FileUtil.exist(resourceName)) {
+                System.err.println("file has been downloaded!");
+                return;
+            }
             ExecutorService es = Executors.newFixedThreadPool(CommonConstants.THREAD_SIZE);
             CountDownLatch countDownLatch = new CountDownLatch(CommonConstants.THREAD_SIZE);
             int singleSize = (int) Math.ceil(resourceLength * 1.0 / CommonConstants.THREAD_SIZE);

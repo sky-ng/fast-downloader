@@ -12,7 +12,7 @@ public class FileUtil {
     // 根据传入的流生成一个文件
     public static void createFile(InputStream is, File file) throws IOException {
         byte[] buffer = new byte[CommonConstants.BUF_SIZE];
-        FileOutputStream os = new FileOutputStream(file);
+        FileOutputStream os = new FileOutputStream(file, true);
         int length = 0;
         while ((length = is.read(buffer)) != -1) {
             os.write(buffer, 0, length);
@@ -37,5 +37,10 @@ public class FileUtil {
         }
         file.mkdirs();
         os.close();
+    }
+
+    public static boolean exist(String fileName) {
+        File file = new File(fileName);
+        return file.exists();
     }
 }

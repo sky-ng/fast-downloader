@@ -38,14 +38,20 @@ public class DownloadHandler implements Runnable {
     @Override
     public void run() {
         try {
+            if (file.exists() && file.length() == (endPos - startPos + 1)) {
+                return;
+            } else if (file.exists()) {
+                startPos = startPos + file.length();
+            }
             HttpURLConnection connection = HttpUtil.getHttpConnection(url, startPos, endPos);
             FileUtil.createFile(connection.getInputStream(), file);
             HttpUtil.closeConnection(connection);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-        if (countDownLatch != null) {
-            countDownLatch.countDown();
+        } finally {
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+            }
         }
     }
 }
