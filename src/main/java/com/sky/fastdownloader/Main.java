@@ -7,7 +7,9 @@ import com.sky.fastdownloader.utils.HttpUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -18,11 +20,14 @@ public class Main {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("please input url!");
+            return;
         } else if (args.length > 1) {
             System.err.println("only one url should be input!");
+            return;
         }
         if (!checkUrl(args[0])) {
             System.err.println("url is invalid!");
+            return;
         }
         try {
             download(args[0]);
@@ -69,8 +74,14 @@ public class Main {
     }
 
     // 根据url获取资源名称
-    private static String getResourceName(String url) {
+    private static String getResourceName(String url) throws UnsupportedEncodingException {
         String[] splitUrl = url.split("/");
-        return splitUrl[splitUrl.length - 1];
+        String resourceName = URLDecoder.decode(splitUrl[splitUrl.length - 1], "utf-8");
+        // 以下处理url中有参数的情况
+        int index = resourceName.indexOf("?");
+        if (index != -1) {
+            resourceName = resourceName.substring(0, index);
+        }
+        return resourceName;
     }
 }
