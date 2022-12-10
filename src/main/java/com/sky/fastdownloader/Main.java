@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
@@ -46,13 +47,15 @@ public class Main {
         String resourceName = getResourceName(url);
         if (resourceLength <= CommonConstants.FILE_SIZE_THRESHOLD) {
             // 单线程下载
-            File file = new File(resourceName);
-            FileUtil.createFile(connection.getInputStream(), file);
             HttpUtil.closeConnection(connection);
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            File file = new File(resourceName);
+            es.execute(new DownloadHandler(url, file, 0, resourceLength));
+            es.shutdown();
         } else {
             // 多线程下载
             HttpUtil.closeConnection(connection);
-            Executor executor = Executors.newFixedThreadPool(CommonConstants.THREAD_SIZE);
+            ExecutorService es = Executors.newFixedThreadPool(CommonConstants.THREAD_SIZE);
             CountDownLatch countDownLatch = new CountDownLatch(CommonConstants.THREAD_SIZE);
             int singleSize = (int) Math.ceil(resourceLength * 1.0 / CommonConstants.THREAD_SIZE);
             List<File> tmpFileList = new ArrayList<>();
@@ -62,13 +65,14 @@ public class Main {
                 File tmpFile = new File(resourceName + ".tmp" + i);
                 tmpFileList.add(tmpFile);
                 if (endPos <= resourceLength) {
-                    executor.execute(new DownloadHandler(countDownLatch, url, tmpFile, startPos, endPos));
+                    es.execute(new DownloadHandler(countDownLatch, url, tmpFile, startPos, endPos));
                 } else {
-                    executor.execute(new DownloadHandler(countDownLatch, url, tmpFile, startPos, resourceLength));
+                    es.execute(new DownloadHandler(countDownLatch, url, tmpFile, startPos, resourceLength));
                 }
             }
             countDownLatch.await();
             FileUtil.compositeFile(tmpFileList, resourceName);
+            es.shutdown();
         }
 
     }

@@ -20,6 +20,13 @@ public class DownloadHandler implements Runnable {
 
     private long endPos;
 
+    public DownloadHandler(String url, File file, long startPos, long endPos) {
+        this.url = url;
+        this.file = file;
+        this.startPos = startPos;
+        this.endPos = endPos;
+    }
+
     public DownloadHandler(CountDownLatch countDownLatch, String url, File file, long startPos, long endPos) {
         this.countDownLatch = countDownLatch;
         this.url = url;
@@ -37,6 +44,8 @@ public class DownloadHandler implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        countDownLatch.countDown();
+        if (countDownLatch != null) {
+            countDownLatch.countDown();
+        }
     }
 }
