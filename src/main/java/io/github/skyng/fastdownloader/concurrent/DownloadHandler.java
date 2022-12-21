@@ -1,7 +1,7 @@
-package com.sky.fastdownloader.concurrent;
+package io.github.skyng.fastdownloader.concurrent;
 
-import com.sky.fastdownloader.utils.FileUtil;
-import com.sky.fastdownloader.utils.HttpUtil;
+import io.github.skyng.fastdownloader.utils.FileUtil;
+import io.github.skyng.fastdownloader.utils.HttpUtil;
 
 import java.io.File;
 import java.io.IOException;

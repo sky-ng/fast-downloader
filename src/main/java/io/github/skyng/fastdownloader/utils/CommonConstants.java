@@ -1,4 +1,4 @@
-package com.sky.fastdownloader.utils;
+package io.github.skyng.fastdownloader.utils;
 
 public class CommonConstants {
 
